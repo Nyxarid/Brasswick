@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasswick - AI Image Forge</title>
+    <style>
+        :root {
+            --brass: #b8860b;
+            --dark-brass: #8b6914;
+            --copper: #b87333;
+            --bronze: #cd7f32;
+            --iron: #3a3a3a;
+            --steel: #71797e;
+            --bg-dark: #1a1410;
+            --bg-panel: #2a2218;
+            --bg-input: #1a1410;
+            --text: #e8d7c3;
+            --text-dim: #a89988;
+            --accent: linear-gradient(135deg, #b8860b 0%, #cd7f32 100%);
+            --glow: rgba(184, 134, 11, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 4px),
+                radial-gradient(circle at 20% 50%, rgba(184, 134, 11, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(205, 127, 50, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 3px solid var(--brass);
+            margin-bottom: 30px;
+            position: relative;
+            background: linear-gradient(to bottom, transparent, rgba(184, 134, 11, 0.05));
+        }
+
+        header::before {
+            content: '⚙';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3em;
+            color: var(--brass);
+            opacity: 0.3;
+        }
+
+        header::after {
+            content: '⚙';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%) scaleX(-1);
+            font-size: 3em;
+            color: var(--brass);
+            opacity: 0.3;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px var(--glow);
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 0.9em;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--brass);
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: var(--bg-panel);
+            border: 2px solid var(--dark-brass);
+            border-bottom: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+        }
+
+        .tab:hover {
+            color: var(--brass);
+            background: var(--iron);
+        }
+
+        .tab.active {
+            color: var(--brass);
+            background: var(--iron);
+            border-color: var(--brass);
+            box-shadow: 0 0 15px var(--glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--dark-brass);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--brass), transparent);
+        }
+
+        .section-header {
+            font-size: 1.1em;
+            color: var(--brass);
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--dark-brass);
+            letter-spacing: 1px;
+        }
+
+        .collapsible-section {
+            margin-bottom: 20px;
+        }
+
+        .collapse-header {
+            background: var(--iron);
+            padding: 12px 15px;
+            cursor: pointer;
+            border: 2px solid var(--dark-brass);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .collapse-header:hover {
+            background: var(--bg-input);
+            border-color: var(--brass);
+        }
+
+        .collapse-header::after {
+            content: '▼';
+            transition: transform 0.3s;
+        }
+
+        .collapse-header.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .collapse-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapse-content.collapsed {
+            max-height: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--brass);
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-input);
+            border: 2px solid var(--dark-brass);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--brass);
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            padding: 8px;
+            background: var(--iron);
+            border: 2px solid var(--dark-brass);
+            color: var(--text-dim);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--brass);
+            color: var(--brass);
+        }
+
+        .lora-section {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid var(--dark-brass);
+        }
+
+        .lora-header {
+            font-size: 0.9em;
+            color: var(--copper);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: var(--text);
+            border: 2px solid var(--brass);
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--glow);
+            border-color: var(--copper);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: var(--iron);
+            border-color: var(--steel);
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button-secondary {
+            background: linear-gradient(135deg, #8b6914 0%, #b87333 100%);
+        }
+
+        .button-icon {
+            margin-right: 5px;
+        }
+
+        .preview-container {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--dark-brass);
+            position: relative;
+        }
+
+        .preview-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            background: var(--iron);
+            border: 2px solid var(--dark-brass);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-input);
+            border-color: var(--brass);
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 800px;
+            border-radius: 4px;
+            display: none;
+            border: 3px solid var(--dark-brass);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        #preview.visible {
+            display: block;
+        }
+
+        .status {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1em;
+            width: 100%;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 2px solid var(--dark-brass);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        .seed-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .seed-controls input {
+            flex: 1;
+        }
+
+        .seed-controls button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-dim);
+            padding: 40px;
+        }
+
+        .placeholder svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+            stroke: var(--brass);
+        }
+
+        .error {
+            background: rgba(139, 0, 0, 0.3);
+            border: 2px solid #8b0000;
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .eta-info {
+            font-size: 0.9em;
+            color: var(--copper);
+            margin-top: 10px;
+        }
+
+        .queue-info {
+            background: var(--bg-input);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid var(--dark-brass);
+        }
+
+        .queue-badge {
+            background: var(--brass);
+            color: var(--bg-dark);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .history-item {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid var(--dark-brass);
+        }
+
+        .history-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px var(--glow);
+            border-color: var(--brass);
+        }
+
+        .history-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: var(--bg-input);
+        }
+
+        .history-info {
+            padding: 15px;
+        }
+
+        .history-time {
+            font-size: 0.85em;
+            color: var(--copper);
+            margin-bottom: 8px;
+        }
+
+        .history-params {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 3px solid var(--brass);
+            box-shadow: 0 0 50px var(--glow);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--iron);
+            border: 2px solid var(--dark-brass);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 2px solid var(--dark-brass);
+        }
+
+        .modal-params {
+            background: var(--bg-input);
+            padding: 20px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            border: 2px solid var(--dark-brass);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+
+        .templates-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .template-item {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--dark-brass);
+            transition: all 0.2s;
+        }
+
+        .template-item:hover {
+            border-color: var(--brass);
+            background: var(--iron);
+        }
+
+        .template-name {
+            font-weight: 600;
+            color: var(--brass);
+            margin-bottom: 5px;
+        }
+
+        .template-preview {
+            font-size: 0.85em;
+            color: var(--text-dim);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .server-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .shortcuts-help {
+            background: var(--bg-input);
+            padding: 15px;
+            border-radius: 4px;
+            border: 2px solid var(--dark-brass);
+            margin-top: 20px;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--dark-brass);
+        }
+
+        .shortcut-key {
+            color: var(--brass);
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+
+            .history-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .history-item img {
+                height: 150px;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .preset-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Steampunk decorative elements */
+        .gear-decoration {
+            position: fixed;
+            font-size: 200px;
+            color: var(--dark-brass);
+            opacity: 0.03;
+            pointer-events: none;
+            animation: rotate-slow 60s linear infinite;
+        }
+
+        .gear-1 {
+            top: 10%;
+            left: 5%;
+        }
+
+        .gear-2 {
+            bottom: 10%;
+            right: 5%;
+            animation-direction: reverse;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="gear-decoration gear-1">⚙</div>
+    <div class="gear-decoration gear-2">⚙</div>
+
+    <div class="container">
+        <header>
+            <h1>⚙ BRASSWICK ⚙</h1>
+            <div class="subtitle">— AI IMAGE FORGE —</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('generate')">⚒ Generate</button>
+            <button class="tab" onclick="switchTab('history')">📜 History</button>
+            <button class="tab" onclick="switchTab('templates')">📋 Templates</button>
+            <button class="tab" onclick="switchTab('settings')">⚙ Settings</button>
+        </div>
+
+        <div id="generate-tab" class="tab-content active">
+            <div class="main-content">
+                <div class="controls-panel">
+                    <div class="panel">
+                        <div id="queue-info" class="queue-info" style="display:none;">
+                            <span>⏳ Queue</span>
+                            <span class="queue-badge" id="queue-count">0</span>
+                        </div>
+
+                        <form id="generation-form">
+                            <div class="form-group">
+                                <label for="model">⚗ Model</label>
+                                <select id="model" required>
+                                    <option value="">Loading models...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="positive">✒ Positive Prompt</label>
+                                <textarea id="positive" placeholder="Describe your vision..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="negative">✖ Negative Prompt</label>
+                                <textarea id="negative" placeholder="What to avoid..."></textarea>
+                            </div>
+
+                            <div class="collapsible-section">
+                                <div class="collapse-header" onclick="toggleCollapse(this)">
+                                    <span>⚙ Advanced Settings</span>
+                                </div>
+                                <div class="collapse-content">
+                                    <div class="form-group" style="margin-top:15px;">
+                                        <label for="sampler">🔧 Sampler</label>
+                                        <select id="sampler">
+                                            <option value="euler_ancestral">Euler Ancestral</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="scheduler">⏱ Scheduler</label>
+                                        <select id="scheduler">
+                                            <option value="normal">Normal</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="cfg">⚖ CFG Scale</label>
+                                        <input type="number" id="cfg" value="8" min="1" max="30" step="0.5">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="seed-control">🎲 Seed After Generation</label>
+                                        <select id="seed-control">
+                                            <option value="random">Randomize Seed</option>
+                                            <option value="fixed">Keep Fixed</option>
+                                            <option value="increment">Increment Seed</option>
+                                            <option value="decrement">Decrement Seed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>🌱 Seed</label>
+                                <div class="seed-controls">
+                                    <input type="number" id="seed" value="-1" min="-1" max="4294967295">
+                                    <button type="button" onclick="randomSeed()">🎲</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="steps">👣 Steps</label>
+                                <input type="number" id="steps" value="20" min="1" max="150">
+                            </div>
+
+                            <div class="form-group">
+                                <label>📐 Dimensions</label>
+                                <div class="input-group">
+                                    <input type="number" id="width" value="1024" min="256" max="2048" step="64">
+                                    <input type="number" id="height" value="1024" min="256" max="2048" step="64">
+                                </div>
+                                <div class="preset-buttons" id="size-presets"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="batch">📦 Batch Size</label>
+                                <input type="number" id="batch" value="1" min="1" max="8">
+                            </div>
+
+                            <div class="collapsible-section">
+                                <div class="collapse-header collapsed" onclick="toggleCollapse(this)">
+                                    <span>🎨 LoRA Enhancement</span>
+                                </div>
+                                <div class="collapse-content collapsed">
+                                    <div class="lora-section" style="margin-top:15px;">
+                                        <div class="lora-header">LoRA 1</div>
+                                        <div class="form-group">
+                                            <label for="lora1">Name</label>
+                                            <select id="lora1">
+                                                <option value="None">None</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lora1_weight">Weight</label>
+                                            <input type="number" id="lora1_weight" value="1" min="0" max="2" step="0.1">
+                                        </div>
+                                    </div>
+
+                                    <div class="lora-section">
+                                        <div class="lora-header">LoRA 2</div>
+                                        <div class="form-group">
+                                            <label for="lora2">Name</label>
+                                            <select id="lora2">
+                                                <option value="None">None</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lora2_weight">Weight</label>
+                                            <input type="number" id="lora2_weight" value="1" min="0" max="2" step="0.1">
+                                        </div>
+                                    </div>
+
+                                    <div class="lora-section">
+                                        <div class="lora-header">LoRA 3</div>
+                                        <div class="form-group">
+                                            <label for="lora3">Name</label>
+                                            <select id="lora3">
+                                                <option value="None">None</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lora3_weight">Weight</label>
+                                            <input type="number" id="lora3_weight" value="1" min="0" max="2" step="0.1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="generate-btn"><span class="button-icon">⚡</span>Generate</button>
+                            <div class="button-group">
+                                <button type="button" class="button-secondary" id="cancel-btn" onclick="cancelGeneration()" style="display:none;"><span class="button-icon">⊗</span>Cancel</button>
+                                <button type="button" class="button-secondary" id="clear-queue-btn" onclick="clearQueue()" style="display:none;"><span class="button-icon">🗑</span>Clear Queue</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <div class="preview-controls" id="preview-controls" style="display:none;">
+                        <button class="icon-btn" onclick="downloadCurrentImage()" title="Download (Ctrl+D)">💾</button>
+                    </div>
+                    <div id="placeholder" class="placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <p>Your forged image will materialize here</p>
+                    </div>
+                    <div id="status" class="status" style="display:none;">
+                        <div id="status-text"></div>
+                        <div class="progress-bar">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div id="eta-info" class="eta-info"></div>
+                    </div>
+                    <img id="preview" alt="Generated image">
+                </div>
+            </div>
+        </div>
+
+        <div id="history-tab" class="tab-content">
+            <div class="panel">
+                <div id="history-container"></div>
+            </div>
+        </div>
+
+        <div id="templates-tab" class="tab-content">
+            <div class="panel">
+                <div class="section-header">📋 Prompt Templates</div>
+                <div class="button-group" style="margin-bottom: 20px;">
+                    <button onclick="saveTemplate()"><span class="button-icon">💾</span>Save Current</button>
+                    <button onclick="showAddTemplate()"><span class="button-icon">➕</span>Add New</button>
+                </div>
+                <div id="templates-container" class="templates-grid"></div>
+            </div>
+        </div>
+
+        <div id="settings-tab" class="tab-content">
+            <div class="panel">
+                <div class="section-header">⚙ Server Configuration</div>
+                
+                <div class="form-group">
+                    <label for="config-server">ComfyUI Server Address</label>
+                    <input type="text" id="config-server" placeholder="127.0.0.1:8188">
+                </div>
+
+                <div class="form-group">
+                    <label for="config-path">ComfyUI Installation Path</label>
+                    <input type="text" id="config-path" placeholder="/path/to/ComfyUI">
+                </div>
+
+                <div class="form-group">
+                    <label for="config-port">Brasswick Port</label>
+                    <input type="number" id="config-port" value="5000">
+                </div>
+
+                <div class="form-group">
+                    <label for="config-history">Max History Items</label>
+                    <input type="number" id="config-history" value="50" min="10" max="500">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="config-multiuser"> Enable Multi-User Mode
+                    </label>
+                </div>
+
+                <button onclick="saveConfig()"><span class="button-icon">💾</span>Save Configuration</button>
+
+                <div class="section-header" style="margin-top: 30px;">🔧 Server Control</div>
+                <div class="server-controls">
+                    <button onclick="startServer()"><span class="button-icon">▶</span>Start</button>
+                    <button onclick="restartServer()"><span class="button-icon">⟳</span>Restart</button>
+                    <button onclick="stopServer()"><span class="button-icon">⏹</span>Stop</button>
+                </div>
+
+                <div class="section-header" style="margin-top: 30px;">⌨ Keyboard Shortcuts</div>
+                <div class="shortcuts-help">
+                    <div class="shortcut-item">
+                        <span>Generate Image</span>
+                        <span class="shortcut-key">Ctrl + Enter</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Cancel Generation</span>
+                        <span class="shortcut-key">Esc</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Random Seed</span>
+                        <span class="shortcut-key">Ctrl + R</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Download Image</span>
+                        <span class="shortcut-key">Ctrl + D</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Save Template</span>
+                        <span class="shortcut-key">Ctrl + S</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <img id="modal-image" class="modal-image">
+            <div id="modal-params" class="modal-params"></div>
+            <div class="modal-actions">
+                <button onclick="downloadHistoryImage()"><span class="button-icon">💾</span>Download</button>
+                <button onclick="sendToGenerate()"><span class="button-icon">⚙</span>Send to Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="template-modal" class="modal" onclick="closeTemplateModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeTemplateModal()">&times;</button>
+            <h2 style="color: var(--brass); margin-bottom: 20px;">Save Template</h2>
+            <div class="form-group">
+                <label for="template-name">Template Name</label>
+                <input type="text" id="template-name" placeholder="My Awesome Style">
+            </div>
+            <div class="form-group">
+                <label for="template-positive">Positive Prompt</label>
+                <textarea id="template-positive" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="template-negative">Negative Prompt</label>
+                <textarea id="template-negative" rows="3"></textarea>
+            </div>
+            <button onclick="confirmSaveTemplate()"><span class="button-icon">💾</span>Save Template</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSeed = -1;
+        let statusCheckInterval = null;
+        let currentHistoryId = null;
+        let templates = JSON.parse(localStorage.getItem('brasswick_templates') || '[]');
+        let userSettings = JSON.parse(localStorage.getItem('brasswick_settings') || '{}');
+
+        // Size presets based on SDXL ratios
+        const sizePresets = {
+            "Square 1:1": { width: 1024, height: 1024 },
+            "Portrait 2:3": { width: 832, height: 1248 },
+            "Portrait 3:4": { width: 896, height: 1152 },
+            "Portrait 9:16": { width: 768, height: 1344 },
+            "Landscape 3:2": { width: 1248, height: 832 },
+            "Landscape 4:3": { width: 1152, height: 896 },
+            "Landscape 16:9": { width: 1344, height: 768 },
+            "Widescreen 1.85:1": { width: 1408, height: 768 },
+            "Cinema 2.39:1": { width: 1536, height: 640 },
+            "SD 512²": { width: 512, height: 512 },
+            "SD Portrait": { width: 512, height: 768 },
+            "SD Landscape": { width: 768, height: 512 }
+        };
+
+        function toggleCollapse(header) {
+            header.classList.toggle('collapsed');
+            const content = header.nextElementSibling;
+            content.classList.toggle('collapsed');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+            
+            if (tab === 'history') {
+                loadHistory();
+            } else if (tab === 'templates') {
+                loadTemplates();
+            } else if (tab === 'settings') {
+                loadSettings();
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const models = await response.json();
+                const select = document.getElementById('model');
+                select.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+                
+                if (userSettings.lastModel && models.includes(userSettings.lastModel)) {
+                    select.value = userSettings.lastModel;
+                }
+            } catch (e) {
+                console.error('Failed to load models:', e);
+            }
+        }
+
+        async function loadLoras() {
+            try {
+                const response = await fetch('/api/loras');
+                const loras = await response.json();
+                const options = loras.map(l => `<option value="${l}">${l}</option>`).join('');
+                document.getElementById('lora1').innerHTML = options;
+                document.getElementById('lora2').innerHTML = options;
+                document.getElementById('lora3').innerHTML = options;
+            } catch (e) {
+                console.error('Failed to load LoRAs:', e);
+            }
+        }
+
+        async function loadSamplers() {
+            try {
+                const response = await fetch('/api/samplers');
+                const samplers = await response.json();
+                const select = document.getElementById('sampler');
+                select.innerHTML = samplers.map(s => `<option value="${s}">${s}</option>`).join('');
+                
+                if (userSettings.sampler && samplers.includes(userSettings.sampler)) {
+                    select.value = userSettings.sampler;
+                }
+            } catch (e) {
+                console.error('Failed to load samplers:', e);
+            }
+        }
+
+        async function loadSchedulers() {
+            try {
+                const response = await fetch('/api/schedulers');
+                const schedulers = await response.json();
+                const select = document.getElementById('scheduler');
+                select.innerHTML = schedulers.map(s => `<option value="${s}">${s}</option>`).join('');
+                
+                if (userSettings.scheduler && schedulers.includes(userSettings.scheduler)) {
+                    select.value = userSettings.scheduler;
+                }
+            } catch (e) {
+                console.error('Failed to load schedulers:', e);
+            }
+        }
+
+        function loadSizePresets() {
+            const container = document.getElementById('size-presets');
+            container.innerHTML = Object.entries(sizePresets).map(([name, size]) => 
+                `<button type="button" class="preset-btn" onclick="setSize(${size.width}, ${size.height})">${name}</button>`
+            ).join('');
+        }
+
+        function setSize(width, height) {
+            document.getElementById('width').value = width;
+            document.getElementById('height').value = height;
+        }
+
+        function randomSeed() {
+            document.getElementById('seed').value = Math.floor(Math.random() * 4294967295);
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}m ${secs}s`;
+        }
+
+        function handleSeedControl(currentSeed) {
+            const control = document.getElementById('seed-control').value;
+            const seedInput = document.getElementById('seed');
+            
+            switch(control) {
+                case 'random':
+                    seedInput.value = -1;
+                    break;
+                case 'fixed':
+                    seedInput.value = currentSeed;
+                    break;
+                case 'increment':
+                    seedInput.value = currentSeed + 1;
+                    break;
+                case 'decrement':
+                    seedInput.value = Math.max(0, currentSeed - 1);
+                    break;
+            }
+        }
+
+        async function checkStatus() {
+            const response = await fetch('/api/status');
+            const status = await response.json();
+            
+            const statusDiv = document.getElementById('status');
+            const statusText = document.getElementById('status-text');
+            const progressFill = document.getElementById('progress-fill');
+            const etaInfo = document.getElementById('eta-info');
+            const placeholder = document.getElementById('placeholder');
+            const preview = document.getElementById('preview');
+            const previewControls = document.getElementById('preview-controls');
+            const generateBtn = document.getElementById('generate-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const clearQueueBtn = document.getElementById('clear-queue-btn');
+            const queueInfo = document.getElementById('queue-info');
+            const queueCount = document.getElementById('queue-count');
+
+            if (status.queue_pending > 0) {
+                queueInfo.style.display = 'flex';
+                queueCount.textContent = status.queue_pending;
+                clearQueueBtn.style.display = 'block';
+            } else {
+                queueInfo.style.display = 'none';
+                clearQueueBtn.style.display = 'none';
+            }
+
+            if (status.status === 'generating') {
+                statusDiv.style.display = 'block';
+                placeholder.style.display = 'none';
+                preview.classList.remove('visible');
+                previewControls.style.display = 'none';
+                statusText.textContent = '⚙ Forging Image...';
+                progressFill.style.width = status.progress + '%';
+                
+                if (status.eta_seconds > 0) {
+                    etaInfo.textContent = `⏱ ETA: ${formatTime(status.eta_seconds)} • ${status.progress}%`;
+                } else {
+                    etaInfo.textContent = `Progress: ${status.progress}%`;
+                }
+                
+                generateBtn.disabled = true;
+                cancelBtn.style.display = 'block';
+            } else if (status.status === 'complete' && status.has_image) {
+                statusDiv.style.display = 'none';
+                placeholder.style.display = 'none';
+                preview.src = '/api/image?' + Date.now();
+                preview.classList.add('visible');
+                previewControls.style.display = 'flex';
+                generateBtn.disabled = false;
+                cancelBtn.style.display = 'none';
+                
+                // Handle seed control
+                if (currentSeed !== -1) {
+                    handleSeedControl(currentSeed);
+                }
+            } else if (status.status === 'error' || status.status === 'cancelled') {
+                statusDiv.style.display = 'none';
+                placeholder.innerHTML = `<div class="error">⚠ ${status.error || 'Generation cancelled'}</div>`;
+                generateBtn.disabled = false;
+                cancelBtn.style.display = 'none';
+            } else {
+                generateBtn.disabled = false;
+                cancelBtn.style.display = 'none';
+            }
+        }
+
+        async function cancelGeneration() {
+            await fetch('/api/cancel', { method: 'POST' });
+            checkStatus();
+        }
+
+        async function clearQueue() {
+            await fetch('/api/clear_queue', { method: 'POST' });
+            checkStatus();
+        }
+
+        async function downloadCurrentImage() {
+            window.open('/api/image/download', '_blank');
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const history = await response.json();
+                const container = document.getElementById('history-container');
+                
+                if (history.length === 0) {
+                    container.innerHTML = '<div class="empty-history">⚙ No forged images yet</div>';
+                    return;
+                }
+                
+                container.innerHTML = '<div class="history-grid">' + 
+                    history.map(item => `
+                        <div class="history-item" onclick="showHistoryModal('${item.id}', ${JSON.stringify(item.params).replace(/"/g, '&quot;')})">
+                            <img src="/api/history/${item.id}" alt="Generated image">
+                            <div class="history-info">
+                                <div class="history-time">⏰ ${new Date(item.timestamp).toLocaleString()}</div>
+                                <div class="history-params">${item.params.positive_prompt.substring(0, 50)}...</div>
+                            </div>
+                        </div>
+                    `).join('') + 
+                '</div>';
+            } catch (e) {
+                console.error('Failed to load history:', e);
+            }
+        }
+
+        function showHistoryModal(id, params) {
+            currentHistoryId = id;
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalParams = document.getElementById('modal-params');
+            
+            modalImage.src = `/api/history/${id}`;
+            modalParams.innerHTML = `
+                <strong>✒ Positive:</strong> ${params.positive_prompt}<br>
+                <strong>✖ Negative:</strong> ${params.negative_prompt}<br>
+                <strong>⚗ Model:</strong> ${params.model}<br>
+                <strong>🌱 Seed:</strong> ${params.seed}<br>
+                <strong>👣 Steps:</strong> ${params.steps}<br>
+                <strong>⚖ CFG:</strong> ${params.cfg}<br>
+                <strong>📐 Size:</strong> ${params.width}x${params.height}<br>
+                <strong>📦 Batch:</strong> ${params.batch_size}<br>
+                <strong>🔧 Sampler:</strong> ${params.sampler || 'euler_ancestral'}<br>
+                <strong>⏱ Scheduler:</strong> ${params.scheduler || 'normal'}
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function downloadHistoryImage() {
+            if (currentHistoryId) {
+                window.open(`/api/history/${currentHistoryId}/download`, '_blank');
+            }
+        }
+
+        function sendToGenerate() {
+            const modalParams = document.getElementById('modal-params').textContent;
+            const paramsMatch = modalParams.match(/Positive: (.+?)Negative: (.+?)Model: (.+?)Seed: (\d+)Steps: (\d+)CFG: ([\d.]+)Size: (\d+)x(\d+)Batch: (\d+)Sampler: (.+?)Scheduler: (.+?)$/s);
+            
+            if (paramsMatch) {
+                document.getElementById('positive').value = paramsMatch[1].trim();
+                document.getElementById('negative').value = paramsMatch[2].trim();
+                document.getElementById('model').value = paramsMatch[3].trim();
+                document.getElementById('seed').value = paramsMatch[4];
+                document.getElementById('steps').value = paramsMatch[5];
+                document.getElementById('cfg').value = paramsMatch[6];
+                document.getElementById('width').value = paramsMatch[7];
+                document.getElementById('height').value = paramsMatch[8];
+                document.getElementById('batch').value = paramsMatch[9];
+                document.getElementById('sampler').value = paramsMatch[10].trim();
+                document.getElementById('scheduler').value = paramsMatch[11].trim();
+                
+                closeModal();
+                switchTab('generate');
+                document.querySelector('.tab').click();
+            }
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'modal') {
+                document.getElementById('modal').classList.remove('active');
+            }
+        }
+
+        // Templates
+        function loadTemplates() {
+            const container = document.getElementById('templates-container');
+            
+            if (templates.length === 0) {
+                container.innerHTML = '<div class="empty-history">⚙ No templates saved</div>';
+                return;
+            }
+            
+            container.innerHTML = templates.map((template, index) => `
+                <div class="template-item" onclick="loadTemplate(${index})">
+                    <div class="template-name">📋 ${template.name}</div>
+                    <div class="template-preview">${template.positive.substring(0, 80)}...</div>
+                    <button onclick="event.stopPropagation(); deleteTemplate(${index})" style="margin-top: 10px; background: linear-gradient(135deg, #8b0000 0%, #b22222 100%);">
+                        <span class="button-icon">🗑</span>Delete
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function saveTemplate() {
+            const positive = document.getElementById('positive').value;
+            const negative = document.getElementById('negative').value;
+            
+            if (!positive) {
+                alert('Please enter a positive prompt first');
+                return;
+            }
+            
+            document.getElementById('template-positive').value = positive;
+            document.getElementById('template-negative').value = negative;
+            document.getElementById('template-modal').classList.add('active');
+        }
+
+        function showAddTemplate() {
+            document.getElementById('template-name').value = '';
+            document.getElementById('template-positive').value = '';
+            document.getElementById('template-negative').value = '';
+            document.getElementById('template-modal').classList.add('active');
+        }
+
+        function confirmSaveTemplate() {
+            const name = document.getElementById('template-name').value;
+            const positive = document.getElementById('template-positive').value;
+            const negative = document.getElementById('template-negative').value;
+            
+            if (!name || !positive) {
+                alert('Please enter a name and positive prompt');
+                return;
+            }
+            
+            templates.push({ name, positive, negative });
+            localStorage.setItem('brasswick_templates', JSON.stringify(templates));
+            
+            closeTemplateModal();
+            loadTemplates();
+        }
+
+        function loadTemplate(index) {
+            const template = templates[index];
+            document.getElementById('positive').value = template.positive;
+            document.getElementById('negative').value = template.negative;
+            switchTab('generate');
+            document.querySelector('.tab').click();
+        }
+
+        function deleteTemplate(index) {
+            if (confirm('Delete this template?')) {
+                templates.splice(index, 1);
+                localStorage.setItem('brasswick_templates', JSON.stringify(templates));
+                loadTemplates();
+            }
+        }
+
+        function closeTemplateModal(event) {
+            if (!event || event.target.id === 'template-modal') {
+                document.getElementById('template-modal').classList.remove('active');
+            }
+        }
+
+        // Settings
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                document.getElementById('config-server').value = config.comfy_server;
+                document.getElementById('config-path').value = config.comfy_path;
+                document.getElementById('config-port').value = config.port;
+                document.getElementById('config-history').value = config.max_history;
+                document.getElementById('config-multiuser').checked = config.multi_user;
+            } catch (e) {
+                console.error('Failed to load config:', e);
+            }
+        }
+
+        async function saveConfig() {
+            const config = {
+                comfy_server: document.getElementById('config-server').value,
+                comfy_path: document.getElementById('config-path').value,
+                port: parseInt(document.getElementById('config-port').value),
+                max_history: parseInt(document.getElementById('config-history').value),
+                multi_user: document.getElementById('config-multiuser').checked
+            };
+            
+            try {
+                await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                alert('⚙ Configuration saved! Restart Brasswick for changes to take effect.');
+            } catch (e) {
+                alert('❌ Failed to save configuration');
+            }
+        }
+
+        async function startServer() {
+            try {
+                const response = await fetch('/api/server/start', { method: 'POST' });
+                const result = await response.json();
+                alert(result.success ? '▶ Server started' : '❌ Failed to start server');
+            } catch (e) {
+                alert('❌ Error starting server');
+            }
+        }
+
+        async function stopServer() {
+            try {
+                const response = await fetch('/api/server/stop', { method: 'POST' });
+                const result = await response.json();
+                alert(result.success ? '⏹ Server stopped' : '❌ Failed to stop server');
+            } catch (e) {
+                alert('❌ Error stopping server');
+            }
+        }
+
+        async function restartServer() {
+            try {
+                const response = await fetch('/api/server/restart', { method: 'POST' });
+                const result = await response.json();
+                alert(result.success ? '⟳ Server restarted' : '❌ Failed to restart server');
+            } catch (e) {
+                alert('❌ Error restarting server');
+            }
+        }
+
+        // Save user preferences
+        function saveUserSettings() {
+            userSettings = {
+                lastModel: document.getElementById('model').value,
+                sampler: document.getElementById('sampler').value,
+                scheduler: document.getElementById('scheduler').value,
+                cfg: document.getElementById('cfg').value,
+                steps: document.getElementById('steps').value,
+                width: document.getElementById('width').value,
+                height: document.getElementById('height').value
+            };
+            localStorage.setItem('brasswick_settings', JSON.stringify(userSettings));
+        }
+
+        function loadUserSettings() {
+            if (userSettings.cfg) document.getElementById('cfg').value = userSettings.cfg;
+            if (userSettings.steps) document.getElementById('steps').value = userSettings.steps;
+            if (userSettings.width) document.getElementById('width').value = userSettings.width;
+            if (userSettings.height) document.getElementById('height').value = userSettings.height;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('generation-form').dispatchEvent(new Event('submit'));
+            } else if (e.key === 'Escape') {
+                if (document.getElementById('modal').classList.contains('active')) {
+                    closeModal();
+                } else if (document.getElementById('template-modal').classList.contains('active')) {
+                    closeTemplateModal();
+                } else {
+                    cancelGeneration();
+                }
+            } else if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                randomSeed();
+            } else if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                downloadCurrentImage();
+            } else if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTemplate();
+            }
+        });
+
+        document.getElementById('generation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const params = {
+                model: document.getElementById('model').value,
+                positive_prompt: document.getElementById('positive').value,
+                negative_prompt: document.getElementById('negative').value,
+                seed: parseInt(document.getElementById('seed').value),
+                steps: parseInt(document.getElementById('steps').value),
+                cfg: parseFloat(document.getElementById('cfg').value),
+                width: parseInt(document.getElementById('width').value),
+                height: parseInt(document.getElementById('height').value),
+                batch_size: parseInt(document.getElementById('batch').value),
+                sampler: document.getElementById('sampler').value,
+                scheduler: document.getElementById('scheduler').value,
+                lora_1_name: document.getElementById('lora1').value,
+                lora_1_weight: parseFloat(document.getElementById('lora1_weight').value),
+                lora_2_name: document.getElementById('lora2').value,
+                lora_2_weight: parseFloat(document.getElementById('lora2_weight').value),
+                lora_3_name: document.getElementById('lora3').value,
+                lora_3_weight: parseFloat(document.getElementById('lora3_weight').value)
+            };
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(params)
+                });
+                
+                const result = await response.json();
+                currentSeed = result.seed;
+                document.getElementById('seed').value = currentSeed;
+                
+                saveUserSettings();
+                
+                if (!statusCheckInterval) {
+                    statusCheckInterval = setInterval(checkStatus, 500);
+                }
+            } catch (e) {
+                alert('❌ Failed to start generation: ' + e.message);
+            }
+        });
+
+        // Initialize
+        loadModels();
+        loadLoras();
+        loadSamplers();
+        loadSchedulers();
+        loadSizePresets();
+        loadUserSettings();
+        
+        statusCheckInterval = setInterval(checkStatus, 500);
+    </script>
+</body>
+</html>
