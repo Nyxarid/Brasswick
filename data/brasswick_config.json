@@ -1,0 +1,8 @@
+{
+  "comfy_server": "127.0.0.1:8188",
+  "comfy_path": "/home/nyxarid/.apps/AI/ComfyUI/ComfyUI",
+  "comfy_venv": "/home/nyxarid/.apps/AI/ComfyUI/comfy-env",
+  "multi_user": false,
+  "max_history": 50,
+  "port": 5000
+}

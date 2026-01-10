@@ -13,26 +13,33 @@ import subprocess
 import signal
 from datetime import datetime
 from collections import deque
-from functools import wraps
+from pathlib import Path
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Configuration
-CONFIG_FILE = 'brasswick_config.json'
+# Get the directory where this script is located
+SCRIPT_DIR = Path(__file__).parent.absolute()
+DATA_DIR = SCRIPT_DIR / 'data'
+DATA_DIR.mkdir(exist_ok=True)
+
+CONFIG_FILE = DATA_DIR / 'brasswick_config.json'
+
+# Default configuration
 DEFAULT_CONFIG = {
     'comfy_server': '127.0.0.1:8188',
     'comfy_path': '/path/to/ComfyUI',
+    'comfy_venv': '/path/to/ComfyUI/venv',  # ComfyUI's virtual environment
     'multi_user': False,
     'max_history': 50,
     'port': 5000
 }
 
 def load_config():
-    if os.path.exists(CONFIG_FILE):
+    if CONFIG_FILE.exists():
         with open(CONFIG_FILE, 'r') as f:
             return {**DEFAULT_CONFIG, **json.load(f)}
-    return DEFAULT_CONFIG
+    return DEFAULT_CONFIG.copy()
 
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
@@ -331,7 +338,7 @@ def generate_image(params):
                         state['generation_state']['progress'] = progress
                         state['generation_state']['eta_seconds'] = int(eta)
             else:
-                # Binary preview data - save for live preview
+                # Binary preview data
                 if len(out) > 8:
                     state['current_image_data'] = out[8:]
         
@@ -387,8 +394,16 @@ def start_comfy_server():
     if comfy_process is None:
         try:
             comfy_path = config['comfy_path']
+            comfy_venv = config.get('comfy_venv', '')
+            
+            # Determine python executable
+            if comfy_venv and os.path.exists(comfy_venv):
+                python_exec = os.path.join(comfy_venv, 'bin', 'python')
+            else:
+                python_exec = 'python'
+            
             comfy_process = subprocess.Popen(
-                ['python', 'main.py'],
+                [python_exec, 'main.py'],
                 cwd=comfy_path,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
@@ -548,6 +563,15 @@ def api_history_download(history_id):
             )
     return '', 404
 
+@app.route('/api/history/<history_id>/params')
+def api_history_params(history_id):
+    """Get parameters for a specific history item"""
+    state = get_user_state()
+    for entry in state['history']:
+        if entry['id'] == history_id:
+            return jsonify(entry['params'])
+    return jsonify({}), 404
+
 @app.route('/api/server/start', methods=['POST'])
 def api_server_start():
     success = start_comfy_server()
@@ -582,4 +606,6 @@ def api_config():
 
 if __name__ == '__main__':
     os.makedirs('templates', exist_ok=True)
+    print(f"Data directory: {DATA_DIR}")
+    print(f"Config file: {CONFIG_FILE}")
     app.run(debug=True, host='0.0.0.0', port=config['port'], threaded=True)

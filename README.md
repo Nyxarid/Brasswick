@@ -9,7 +9,7 @@ An A1111 like website for image generation website that uses ComfyUI as a backbo
  - Positive and negative prompts
  - Control over seed, seed control, CFG, image size, batch size, steps, sampler, scheduler and the model.
  - Default workflow (currently doesn't work with other ones)
- - Rad theme
+ - Rad theme (togglable)
  - ETA of generation
  - Quick dimension selector
  - LoRA support (up to 3 currently)
@@ -18,9 +18,9 @@ An A1111 like website for image generation website that uses ComfyUI as a backbo
  - Generation history since startup
  - Prompt tempaltes (save prompts and reuse them)
  - Keyboard shortcuts
+ - ComfyUI erver control (Linux only) (Start/restart/stop)
 
 ### WIP
- - ComfyUI erver control (Linux only) (Start/restart/stop)
  - Multi user support (role based permissions and passwords)
 
 ### Possible
@@ -42,7 +42,7 @@ An A1111 like website for image generation website that uses ComfyUI as a backbo
  
 
 ## Disclaimer
-Do not expose this UI in public networks or port forward this, as for there may be security vulnarbilities.
+Do not expose this UI in public networks or port forward this, as for there may be security vulnarbilities and other people could generate content on your machine.
 
 ## License
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)

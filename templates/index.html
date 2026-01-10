@@ -21,6 +21,22 @@
             --glow: rgba(184, 134, 11, 0.4);
         }
 
+        body.minimal-mode {
+            --brass: #4a90e2;
+            --dark-brass: #357abd;
+            --copper: #5ca3e5;
+            --bronze: #6bb3f0;
+            --iron: #2a2a2a;
+            --steel: #5a5a5a;
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-input: #2a2a2a;
+            --text: #e0e0e0;
+            --text-dim: #999;
+            --accent: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            --glow: rgba(74, 144, 226, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -38,6 +54,11 @@
                 radial-gradient(circle at 80% 80%, rgba(205, 127, 50, 0.03) 0%, transparent 50%);
         }
 
+        body.minimal-mode {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-image: none;
+        }
+
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -53,10 +74,14 @@
             background: linear-gradient(to bottom, transparent, rgba(184, 134, 11, 0.05));
         }
 
-        header::before {
+        body.minimal-mode header {
+            padding: 20px 0;
+            background: none;
+        }
+
+        header::before, header::after {
             content: '⚙';
             position: absolute;
-            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 3em;
@@ -64,15 +89,18 @@
             opacity: 0.3;
         }
 
+        body.minimal-mode header::before,
+        body.minimal-mode header::after {
+            display: none;
+        }
+
+        header::before {
+            left: 20px;
+        }
+
         header::after {
-            content: '⚙';
-            position: absolute;
             right: 20px;
-            top: 50%;
             transform: translateY(-50%) scaleX(-1);
-            font-size: 3em;
-            color: var(--brass);
-            opacity: 0.3;
         }
 
         h1 {
@@ -82,8 +110,12 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: 3px;
-            text-shadow: 0 0 20px var(--glow);
             font-weight: bold;
+        }
+
+        body.minimal-mode h1 {
+            font-size: 2em;
+            letter-spacing: 1px;
         }
 
         .subtitle {
@@ -93,11 +125,65 @@
             margin-top: 5px;
         }
 
+        body.minimal-mode .subtitle {
+            display: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--bg-panel);
+            border: 2px solid var(--brass);
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            color: var(--brass);
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--iron);
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        .gear-decoration {
+            position: fixed;
+            font-size: 200px;
+            color: var(--dark-brass);
+            opacity: 0.03;
+            pointer-events: none;
+            animation: rotate-slow 60s linear infinite;
+        }
+
+        body.minimal-mode .gear-decoration {
+            display: none;
+        }
+
+        .gear-1 {
+            top: 10%;
+            left: 5%;
+        }
+
+        .gear-2 {
+            bottom: 10%;
+            right: 5%;
+            animation-direction: reverse;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .tabs {
             display: flex;
             gap: 5px;
             margin-bottom: 20px;
             border-bottom: 3px solid var(--brass);
+            overflow-x: auto;
         }
 
         .tab {
@@ -109,9 +195,17 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s;
+            white-space: nowrap;
             position: relative;
+        }
+
+        body:not(.minimal-mode) .tab {
             clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+        }
+
+        body.minimal-mode .tab {
+            border-radius: 4px 4px 0 0;
+            padding: 12px 24px;
         }
 
         .tab:hover {
@@ -150,9 +244,9 @@
             background: var(--bg-panel);
             border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             border: 2px solid var(--dark-brass);
             position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .panel::before {
@@ -165,13 +259,20 @@
             background: linear-gradient(90deg, transparent, var(--brass), transparent);
         }
 
+        body.minimal-mode .panel {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        body.minimal-mode .panel::before {
+            display: none;
+        }
+
         .section-header {
             font-size: 1.1em;
             color: var(--brass);
             margin: 25px 0 15px;
             padding-bottom: 8px;
             border-bottom: 2px solid var(--dark-brass);
-            letter-spacing: 1px;
         }
 
         .collapsible-section {
@@ -187,12 +288,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
-        }
-
-        .collapse-header:hover {
-            background: var(--bg-input);
-            border-color: var(--brass);
         }
 
         .collapse-header::after {
@@ -205,7 +300,7 @@
         }
 
         .collapse-content {
-            max-height: 1000px;
+            max-height: 2000px;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
@@ -224,7 +319,6 @@
             font-weight: 600;
             font-size: 0.9em;
             color: var(--brass);
-            letter-spacing: 0.5px;
         }
 
         input[type="text"],
@@ -239,7 +333,6 @@
             color: var(--text);
             font-size: 14px;
             font-family: inherit;
-            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         input:focus,
@@ -247,7 +340,6 @@
         textarea:focus {
             outline: none;
             border-color: var(--brass);
-            box-shadow: 0 0 10px var(--glow);
         }
 
         textarea {
@@ -261,7 +353,13 @@
             gap: 15px;
         }
 
-        .preset-buttons {
+        .dimension-controls {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 10px;
+        }
+
+        .aspect-ratios {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
@@ -269,17 +367,18 @@
         }
 
         .preset-btn {
-            padding: 8px;
+            padding: 10px 8px;
             background: var(--iron);
             border: 2px solid var(--dark-brass);
             color: var(--text-dim);
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.85em;
-            transition: all 0.2s;
+            text-align: center;
         }
 
-        .preset-btn:hover {
+        .preset-btn:hover,
+        .preset-btn.active {
             background: var(--bg-input);
             border-color: var(--brass);
             color: var(--brass);
@@ -310,17 +409,16 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             font-family: inherit;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px var(--glow);
-            border-color: var(--copper);
         }
 
         button:active {
@@ -346,10 +444,6 @@
             background: linear-gradient(135deg, #8b6914 0%, #b87333 100%);
         }
 
-        .button-icon {
-            margin-right: 5px;
-        }
-
         .preview-container {
             background: var(--bg-panel);
             border-radius: 8px;
@@ -369,6 +463,7 @@
             right: 20px;
             display: flex;
             gap: 10px;
+            z-index: 10;
         }
 
         .icon-btn {
@@ -379,13 +474,6 @@
             border: 2px solid var(--dark-brass);
             border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .icon-btn:hover {
-            background: var(--bg-input);
-            border-color: var(--brass);
-            box-shadow: 0 0 10px var(--glow);
         }
 
         #preview {
@@ -394,7 +482,6 @@
             border-radius: 4px;
             display: none;
             border: 3px solid var(--dark-brass);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
         }
 
         #preview.visible {
@@ -423,7 +510,6 @@
             background: var(--accent);
             width: 0%;
             transition: width 0.3s;
-            box-shadow: 0 0 10px var(--glow);
         }
 
         .seed-controls {
@@ -502,13 +588,11 @@
             border-radius: 8px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
             border: 2px solid var(--dark-brass);
         }
 
         .history-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 20px var(--glow);
             border-color: var(--brass);
         }
 
@@ -560,12 +644,12 @@
             background: var(--bg-panel);
             border-radius: 8px;
             padding: 30px;
-            max-width: 1200px;
+            max-width: 90vw;
+            width: 1200px;
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
             border: 3px solid var(--brass);
-            box-shadow: 0 0 50px var(--glow);
         }
 
         .modal-close {
@@ -598,6 +682,7 @@
             font-size: 0.9em;
             line-height: 1.8;
             border: 2px solid var(--dark-brass);
+            word-break: break-word;
         }
 
         .modal-actions {
@@ -627,12 +712,10 @@
             border-radius: 4px;
             cursor: pointer;
             border: 2px solid var(--dark-brass);
-            transition: all 0.2s;
         }
 
         .template-item:hover {
             border-color: var(--brass);
-            background: var(--iron);
         }
 
         .template-name {
@@ -678,10 +761,6 @@
         }
 
         @media (max-width: 768px) {
-            .input-group {
-                grid-template-columns: 1fr;
-            }
-
             .container {
                 padding: 15px;
             }
@@ -690,58 +769,41 @@
                 font-size: 1.8em;
             }
 
-            .panel {
-                padding: 20px;
+            .input-group,
+            .button-group,
+            .dimension-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .aspect-ratios {
+                grid-template-columns: repeat(2, 1fr);
             }
 
             .history-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
             }
 
             .history-item img {
                 height: 150px;
             }
 
-            .button-group {
+            .server-controls {
                 grid-template-columns: 1fr;
             }
 
-            .preset-buttons {
-                grid-template-columns: repeat(2, 1fr);
+            .modal-actions {
+                flex-direction: column;
             }
-        }
-
-        /* Steampunk decorative elements */
-        .gear-decoration {
-            position: fixed;
-            font-size: 200px;
-            color: var(--dark-brass);
-            opacity: 0.03;
-            pointer-events: none;
-            animation: rotate-slow 60s linear infinite;
-        }
-
-        .gear-1 {
-            top: 10%;
-            left: 5%;
-        }
-
-        .gear-2 {
-            bottom: 10%;
-            right: 5%;
-            animation-direction: reverse;
-        }
-
-        @keyframes rotate-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="gear-decoration gear-1">⚙</div>
     <div class="gear-decoration gear-2">⚙</div>
+    
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🎨</span> <span id="theme-text">Minimal</span>
+    </button>
 
     <div class="container">
         <header>
@@ -769,7 +831,7 @@
                             <div class="form-group">
                                 <label for="model">⚗ Model</label>
                                 <select id="model" required>
-                                    <option value="">Loading models...</option>
+                                    <option value="">Loading...</option>
                                 </select>
                             </div>
 
@@ -790,16 +852,12 @@
                                 <div class="collapse-content">
                                     <div class="form-group" style="margin-top:15px;">
                                         <label for="sampler">🔧 Sampler</label>
-                                        <select id="sampler">
-                                            <option value="euler_ancestral">Euler Ancestral</option>
-                                        </select>
+                                        <select id="sampler"></select>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="scheduler">⏱ Scheduler</label>
-                                        <select id="scheduler">
-                                            <option value="normal">Normal</option>
-                                        </select>
+                                        <select id="scheduler"></select>
                                     </div>
 
                                     <div class="form-group">
@@ -808,7 +866,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="seed-control">🎲 Seed After Generation</label>
+                                        <label for="seed-control">🎲 After Generation</label>
                                         <select id="seed-control">
                                             <option value="random">Randomize Seed</option>
                                             <option value="fixed">Keep Fixed</option>
@@ -834,11 +892,17 @@
 
                             <div class="form-group">
                                 <label>📐 Dimensions</label>
-                                <div class="input-group">
-                                    <input type="number" id="width" value="1024" min="256" max="2048" step="64">
-                                    <input type="number" id="height" value="1024" min="256" max="2048" step="64">
+                                <div class="dimension-controls">
+                                    <select id="size-preset">
+                                        <option value="sdxl">SDXL (1024)</option>
+                                        <option value="sd">SD (512)</option>
+                                    </select>
+                                    <div class="input-group">
+                                        <input type="number" id="width" value="1024" min="256" max="2048" step="64" readonly>
+                                        <input type="number" id="height" value="1024" min="256" max="2048" step="64" readonly>
+                                    </div>
                                 </div>
-                                <div class="preset-buttons" id="size-presets"></div>
+                                <div class="aspect-ratios" id="aspect-ratios"></div>
                             </div>
 
                             <div class="form-group">
@@ -854,10 +918,7 @@
                                     <div class="lora-section" style="margin-top:15px;">
                                         <div class="lora-header">LoRA 1</div>
                                         <div class="form-group">
-                                            <label for="lora1">Name</label>
-                                            <select id="lora1">
-                                                <option value="None">None</option>
-                                            </select>
+                                            <select id="lora1"></select>
                                         </div>
                                         <div class="form-group">
                                             <label for="lora1_weight">Weight</label>
@@ -868,10 +929,7 @@
                                     <div class="lora-section">
                                         <div class="lora-header">LoRA 2</div>
                                         <div class="form-group">
-                                            <label for="lora2">Name</label>
-                                            <select id="lora2">
-                                                <option value="None">None</option>
-                                            </select>
+                                            <select id="lora2"></select>
                                         </div>
                                         <div class="form-group">
                                             <label for="lora2_weight">Weight</label>
@@ -882,10 +940,7 @@
                                     <div class="lora-section">
                                         <div class="lora-header">LoRA 3</div>
                                         <div class="form-group">
-                                            <label for="lora3">Name</label>
-                                            <select id="lora3">
-                                                <option value="None">None</option>
-                                            </select>
+                                            <select id="lora3"></select>
                                         </div>
                                         <div class="form-group">
                                             <label for="lora3_weight">Weight</label>
@@ -895,10 +950,10 @@
                                 </div>
                             </div>
 
-                            <button type="submit" id="generate-btn"><span class="button-icon">⚡</span>Generate</button>
+                            <button type="submit" id="generate-btn">⚡ Generate</button>
                             <div class="button-group">
-                                <button type="button" class="button-secondary" id="cancel-btn" onclick="cancelGeneration()" style="display:none;"><span class="button-icon">⊗</span>Cancel</button>
-                                <button type="button" class="button-secondary" id="clear-queue-btn" onclick="clearQueue()" style="display:none;"><span class="button-icon">🗑</span>Clear Queue</button>
+                                <button type="button" class="button-secondary" id="cancel-btn" onclick="cancelGeneration()" style="display:none;">⊗ Cancel</button>
+                                <button type="button" class="button-secondary" id="clear-queue-btn" onclick="clearQueue()" style="display:none;">🗑 Clear Queue</button>
                             </div>
                         </form>
                     </div>
@@ -906,7 +961,7 @@
 
                 <div class="preview-container">
                     <div class="preview-controls" id="preview-controls" style="display:none;">
-                        <button class="icon-btn" onclick="downloadCurrentImage()" title="Download (Ctrl+D)">💾</button>
+                        <button class="icon-btn" onclick="downloadCurrentImage()" title="Download">💾</button>
                     </div>
                     <div id="placeholder" class="placeholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -938,8 +993,8 @@
             <div class="panel">
                 <div class="section-header">📋 Prompt Templates</div>
                 <div class="button-group" style="margin-bottom: 20px;">
-                    <button onclick="saveTemplate()"><span class="button-icon">💾</span>Save Current</button>
-                    <button onclick="showAddTemplate()"><span class="button-icon">➕</span>Add New</button>
+                    <button onclick="saveTemplate()">💾 Save Current</button>
+                    <button onclick="showAddTemplate()">➕ Add New</button>
                 </div>
                 <div id="templates-container" class="templates-grid"></div>
             </div>
@@ -960,6 +1015,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="config-venv">ComfyUI Virtual Environment (Optional)</label>
+                    <input type="text" id="config-venv" placeholder="/path/to/ComfyUI/venv">
+                </div>
+
+                <div class="form-group">
                     <label for="config-port">Brasswick Port</label>
                     <input type="number" id="config-port" value="5000">
                 </div>
@@ -975,36 +1035,39 @@
                     </label>
                 </div>
 
-                <button onclick="saveConfig()"><span class="button-icon">💾</span>Save Configuration</button>
+                <button onclick="saveConfig()">💾 Save Configuration</button>
 
-                <div class="section-header" style="margin-top: 30px;">🔧 Server Control</div>
+                <div class="section-header">🔧 Server Control</div>
+                <p style="color: var(--text-dim); margin-bottom: 15px; font-size: 0.9em;">
+                    Start/Stop/Restart the ComfyUI server. Set paths above first.
+                </p>
                 <div class="server-controls">
-                    <button onclick="startServer()"><span class="button-icon">▶</span>Start</button>
-                    <button onclick="restartServer()"><span class="button-icon">⟳</span>Restart</button>
-                    <button onclick="stopServer()"><span class="button-icon">⏹</span>Stop</button>
+                    <button onclick="startServer()">▶ Start</button>
+                    <button onclick="restartServer()">⟳ Restart</button>
+                    <button onclick="stopServer()">⏹ Stop</button>
                 </div>
 
-                <div class="section-header" style="margin-top: 30px;">⌨ Keyboard Shortcuts</div>
+                <div class="section-header">⌨ Keyboard Shortcuts</div>
                 <div class="shortcuts-help">
                     <div class="shortcut-item">
-                        <span>Generate Image</span>
-                        <span class="shortcut-key">Ctrl + Enter</span>
+                        <span>Generate</span>
+                        <span class="shortcut-key">Ctrl+Enter</span>
                     </div>
                     <div class="shortcut-item">
-                        <span>Cancel Generation</span>
+                        <span>Cancel</span>
                         <span class="shortcut-key">Esc</span>
                     </div>
                     <div class="shortcut-item">
                         <span>Random Seed</span>
-                        <span class="shortcut-key">Ctrl + R</span>
+                        <span class="shortcut-key">Ctrl+R</span>
                     </div>
                     <div class="shortcut-item">
-                        <span>Download Image</span>
-                        <span class="shortcut-key">Ctrl + D</span>
+                        <span>Download</span>
+                        <span class="shortcut-key">Ctrl+D</span>
                     </div>
                     <div class="shortcut-item">
                         <span>Save Template</span>
-                        <span class="shortcut-key">Ctrl + S</span>
+                        <span class="shortcut-key">Ctrl+S</span>
                     </div>
                 </div>
             </div>
@@ -1017,8 +1080,8 @@
             <img id="modal-image" class="modal-image">
             <div id="modal-params" class="modal-params"></div>
             <div class="modal-actions">
-                <button onclick="downloadHistoryImage()"><span class="button-icon">💾</span>Download</button>
-                <button onclick="sendToGenerate()"><span class="button-icon">⚙</span>Send to Generate</button>
+                <button onclick="downloadHistoryImage()">💾 Download</button>
+                <button onclick="sendToGenerate()">⚙ Send to Generate</button>
             </div>
         </div>
     </div>
@@ -1029,7 +1092,7 @@
             <h2 style="color: var(--brass); margin-bottom: 20px;">Save Template</h2>
             <div class="form-group">
                 <label for="template-name">Template Name</label>
-                <input type="text" id="template-name" placeholder="My Awesome Style">
+                <input type="text" id="template-name" placeholder="My Style">
             </div>
             <div class="form-group">
                 <label for="template-positive">Positive Prompt</label>
@@ -1039,7 +1102,7 @@
                 <label for="template-negative">Negative Prompt</label>
                 <textarea id="template-negative" rows="3"></textarea>
             </div>
-            <button onclick="confirmSaveTemplate()"><span class="button-icon">💾</span>Save Template</button>
+            <button onclick="confirmSaveTemplate()">💾 Save Template</button>
         </div>
     </div>
 
@@ -1050,53 +1113,84 @@
         let templates = JSON.parse(localStorage.getItem('brasswick_templates') || '[]');
         let userSettings = JSON.parse(localStorage.getItem('brasswick_settings') || '{}');
 
-        // Size presets based on SDXL ratios
-        const sizePresets = {
-            "Square 1:1": { width: 1024, height: 1024 },
-            "Portrait 2:3": { width: 832, height: 1248 },
-            "Portrait 3:4": { width: 896, height: 1152 },
-            "Portrait 9:16": { width: 768, height: 1344 },
-            "Landscape 3:2": { width: 1248, height: 832 },
-            "Landscape 4:3": { width: 1152, height: 896 },
-            "Landscape 16:9": { width: 1344, height: 768 },
-            "Widescreen 1.85:1": { width: 1408, height: 768 },
-            "Cinema 2.39:1": { width: 1536, height: 640 },
-            "SD 512²": { width: 512, height: 512 },
-            "SD Portrait": { width: 512, height: 768 },
-            "SD Landscape": { width: 768, height: 512 }
+        const aspectRatios = {
+            sdxl: {
+                "1:1": { width: 1024, height: 1024 },
+                "2:3": { width: 832, height: 1248 },
+                "3:4": { width: 896, height: 1152 },
+                "9:16": { width: 768, height: 1344 },
+                "3:2": { width: 1248, height: 832 },
+                "4:3": { width: 1152, height: 896 },
+                "16:9": { width: 1344, height: 768 },
+                "1.85:1": { width: 1408, height: 768 },
+                "2.39:1": { width: 1536, height: 640 }
+            },
+            sd: {
+                "1:1": { width: 512, height: 512 },
+                "2:3": { width: 416, height: 624 },
+                "3:4": { width: 448, height: 576 },
+                "9:16": { width: 384, height: 672 },
+                "3:2": { width: 624, height: 416 },
+                "4:3": { width: 576, height: 448 },
+                "16:9": { width: 672, height: 384 },
+                "1.85:1": { width: 704, height: 384 },
+                "2.39:1": { width: 768, height: 320 }
+            }
         };
+
+        function toggleTheme() {
+            const body = document.body;
+            const isMinimal = body.classList.toggle('minimal-mode');
+            localStorage.setItem('brasswick_minimal_mode', isMinimal);
+            document.getElementById('theme-icon').textContent = isMinimal ? '⚙' : '🎨';
+            document.getElementById('theme-text').textContent = isMinimal ? 'Steampunk' : 'Minimal';
+        }
+
+        function loadTheme() {
+            if (localStorage.getItem('brasswick_minimal_mode') === 'true') {
+                document.body.classList.add('minimal-mode');
+                document.getElementById('theme-icon').textContent = '⚙';
+                document.getElementById('theme-text').textContent = 'Steampunk';
+            }
+        }
 
         function toggleCollapse(header) {
             header.classList.toggle('collapsed');
-            const content = header.nextElementSibling;
-            content.classList.toggle('collapsed');
+            header.nextElementSibling.classList.toggle('collapsed');
         }
 
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             event.target.classList.add('active');
             document.getElementById(tab + '-tab').classList.add('active');
             
-            if (tab === 'history') {
-                loadHistory();
-            } else if (tab === 'templates') {
-                loadTemplates();
-            } else if (tab === 'settings') {
-                loadSettings();
-            }
+            if (tab === 'history') loadHistory();
+            else if (tab === 'templates') loadTemplates();
+            else if (tab === 'settings') loadSettings();
+        }
+
+        function loadAspectRatios() {
+            const size = document.getElementById('size-preset').value;
+            const container = document.getElementById('aspect-ratios');
+            container.innerHTML = Object.keys(aspectRatios[size]).map(ratio => 
+                `<button type="button" class="preset-btn" onclick="setAspectRatio('${size}', '${ratio}')">${ratio}</button>`
+            ).join('');
+        }
+
+        function setAspectRatio(size, ratio) {
+            const dim = aspectRatios[size][ratio];
+            document.getElementById('width').value = dim.width;
+            document.getElementById('height').value = dim.height;
         }
 
         async function loadModels() {
             try {
-                const response = await fetch('/api/models');
-                const models = await response.json();
-                const select = document.getElementById('model');
-                select.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
-                
-                if (userSettings.lastModel && models.includes(userSettings.lastModel)) {
-                    select.value = userSettings.lastModel;
+                const res = await fetch('/api/models');
+                const models = await res.json();
+                document.getElementById('model').innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+                if (userSettings.model && models.includes(userSettings.model)) {
+                    document.getElementById('model').value = userSettings.model;
                 }
             } catch (e) {
                 console.error('Failed to load models:', e);
@@ -1105,12 +1199,23 @@
 
         async function loadLoras() {
             try {
-                const response = await fetch('/api/loras');
-                const loras = await response.json();
-                const options = loras.map(l => `<option value="${l}">${l}</option>`).join('');
-                document.getElementById('lora1').innerHTML = options;
-                document.getElementById('lora2').innerHTML = options;
-                document.getElementById('lora3').innerHTML = options;
+                const res = await fetch('/api/loras');
+                const loras = await res.json();
+                const opts = loras.map(l => `<option value="${l}">${l}</option>`).join('');
+                document.getElementById('lora1').innerHTML = opts;
+                document.getElementById('lora2').innerHTML = opts;
+                document.getElementById('lora3').innerHTML = opts;
+                
+                // Load saved LoRA selections
+                if (userSettings.lora_1_name && loras.includes(userSettings.lora_1_name)) {
+                    document.getElementById('lora1').value = userSettings.lora_1_name;
+                }
+                if (userSettings.lora_2_name && loras.includes(userSettings.lora_2_name)) {
+                    document.getElementById('lora2').value = userSettings.lora_2_name;
+                }
+                if (userSettings.lora_3_name && loras.includes(userSettings.lora_3_name)) {
+                    document.getElementById('lora3').value = userSettings.lora_3_name;
+                }
             } catch (e) {
                 console.error('Failed to load LoRAs:', e);
             }
@@ -1118,13 +1223,11 @@
 
         async function loadSamplers() {
             try {
-                const response = await fetch('/api/samplers');
-                const samplers = await response.json();
-                const select = document.getElementById('sampler');
-                select.innerHTML = samplers.map(s => `<option value="${s}">${s}</option>`).join('');
-                
+                const res = await fetch('/api/samplers');
+                const samplers = await res.json();
+                document.getElementById('sampler').innerHTML = samplers.map(s => `<option value="${s}">${s}</option>`).join('');
                 if (userSettings.sampler && samplers.includes(userSettings.sampler)) {
-                    select.value = userSettings.sampler;
+                    document.getElementById('sampler').value = userSettings.sampler;
                 }
             } catch (e) {
                 console.error('Failed to load samplers:', e);
@@ -1133,136 +1236,95 @@
 
         async function loadSchedulers() {
             try {
-                const response = await fetch('/api/schedulers');
-                const schedulers = await response.json();
-                const select = document.getElementById('scheduler');
-                select.innerHTML = schedulers.map(s => `<option value="${s}">${s}</option>`).join('');
-                
+                const res = await fetch('/api/schedulers');
+                const schedulers = await res.json();
+                document.getElementById('scheduler').innerHTML = schedulers.map(s => `<option value="${s}">${s}</option>`).join('');
                 if (userSettings.scheduler && schedulers.includes(userSettings.scheduler)) {
-                    select.value = userSettings.scheduler;
+                    document.getElementById('scheduler').value = userSettings.scheduler;
                 }
             } catch (e) {
                 console.error('Failed to load schedulers:', e);
             }
         }
 
-        function loadSizePresets() {
-            const container = document.getElementById('size-presets');
-            container.innerHTML = Object.entries(sizePresets).map(([name, size]) => 
-                `<button type="button" class="preset-btn" onclick="setSize(${size.width}, ${size.height})">${name}</button>`
-            ).join('');
-        }
-
-        function setSize(width, height) {
-            document.getElementById('width').value = width;
-            document.getElementById('height').value = height;
-        }
-
         function randomSeed() {
             document.getElementById('seed').value = Math.floor(Math.random() * 4294967295);
         }
 
-        function formatTime(seconds) {
-            if (seconds < 60) return `${seconds}s`;
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}m ${secs}s`;
+        function formatTime(sec) {
+            if (sec < 60) return `${sec}s`;
+            return `${Math.floor(sec/60)}m ${sec%60}s`;
         }
 
-        function handleSeedControl(currentSeed) {
-            const control = document.getElementById('seed-control').value;
-            const seedInput = document.getElementById('seed');
-            
-            switch(control) {
-                case 'random':
-                    seedInput.value = -1;
-                    break;
-                case 'fixed':
-                    seedInput.value = currentSeed;
-                    break;
-                case 'increment':
-                    seedInput.value = currentSeed + 1;
-                    break;
-                case 'decrement':
-                    seedInput.value = Math.max(0, currentSeed - 1);
-                    break;
-            }
+        function handleSeedControl(lastSeed) {
+            const ctrl = document.getElementById('seed-control').value;
+            const input = document.getElementById('seed');
+            if (ctrl === 'random') input.value = -1;
+            else if (ctrl === 'fixed') input.value = lastSeed;
+            else if (ctrl === 'increment') input.value = lastSeed + 1;
+            else if (ctrl === 'decrement') input.value = Math.max(0, lastSeed - 1);
         }
 
         async function checkStatus() {
-            const response = await fetch('/api/status');
-            const status = await response.json();
+            const res = await fetch('/api/status');
+            const status = await res.json();
             
-            const statusDiv = document.getElementById('status');
-            const statusText = document.getElementById('status-text');
-            const progressFill = document.getElementById('progress-fill');
-            const etaInfo = document.getElementById('eta-info');
-            const placeholder = document.getElementById('placeholder');
-            const preview = document.getElementById('preview');
-            const previewControls = document.getElementById('preview-controls');
-            const generateBtn = document.getElementById('generate-btn');
-            const cancelBtn = document.getElementById('cancel-btn');
-            const clearQueueBtn = document.getElementById('clear-queue-btn');
             const queueInfo = document.getElementById('queue-info');
             const queueCount = document.getElementById('queue-count');
-
             if (status.queue_pending > 0) {
                 queueInfo.style.display = 'flex';
                 queueCount.textContent = status.queue_pending;
-                clearQueueBtn.style.display = 'block';
+                document.getElementById('clear-queue-btn').style.display = 'block';
             } else {
                 queueInfo.style.display = 'none';
-                clearQueueBtn.style.display = 'none';
+                document.getElementById('clear-queue-btn').style.display = 'none';
             }
+
+            const statusDiv = document.getElementById('status');
+            const preview = document.getElementById('preview');
+            const placeholder = document.getElementById('placeholder');
+            const controls = document.getElementById('preview-controls');
+            const genBtn = document.getElementById('generate-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
 
             if (status.status === 'generating') {
                 statusDiv.style.display = 'block';
                 placeholder.style.display = 'none';
                 preview.classList.remove('visible');
-                previewControls.style.display = 'none';
-                statusText.textContent = '⚙ Forging Image...';
-                progressFill.style.width = status.progress + '%';
-                
-                if (status.eta_seconds > 0) {
-                    etaInfo.textContent = `⏱ ETA: ${formatTime(status.eta_seconds)} • ${status.progress}%`;
-                } else {
-                    etaInfo.textContent = `Progress: ${status.progress}%`;
-                }
-                
-                generateBtn.disabled = true;
+                controls.style.display = 'none';
+                document.getElementById('status-text').textContent = '⚙ Forging...';
+                document.getElementById('progress-fill').style.width = status.progress + '%';
+                document.getElementById('eta-info').textContent = status.eta_seconds > 0 
+                    ? `⏱ ETA: ${formatTime(status.eta_seconds)} • ${status.progress}%`
+                    : `Progress: ${status.progress}%`;
+                genBtn.disabled = true;
                 cancelBtn.style.display = 'block';
             } else if (status.status === 'complete' && status.has_image) {
                 statusDiv.style.display = 'none';
                 placeholder.style.display = 'none';
                 preview.src = '/api/image?' + Date.now();
                 preview.classList.add('visible');
-                previewControls.style.display = 'flex';
-                generateBtn.disabled = false;
+                controls.style.display = 'flex';
+                genBtn.disabled = false;
                 cancelBtn.style.display = 'none';
-                
-                // Handle seed control
-                if (currentSeed !== -1) {
-                    handleSeedControl(currentSeed);
-                }
+                if (currentSeed !== -1) handleSeedControl(currentSeed);
             } else if (status.status === 'error' || status.status === 'cancelled') {
                 statusDiv.style.display = 'none';
-                placeholder.innerHTML = `<div class="error">⚠ ${status.error || 'Generation cancelled'}</div>`;
-                generateBtn.disabled = false;
+                placeholder.innerHTML = `<div class="error">⚠ ${status.error || 'Cancelled'}</div>`;
+                genBtn.disabled = false;
                 cancelBtn.style.display = 'none';
             } else {
-                generateBtn.disabled = false;
+                genBtn.disabled = false;
                 cancelBtn.style.display = 'none';
             }
         }
 
         async function cancelGeneration() {
             await fetch('/api/cancel', { method: 'POST' });
-            checkStatus();
         }
 
         async function clearQueue() {
             await fetch('/api/clear_queue', { method: 'POST' });
-            checkStatus();
         }
 
         async function downloadCurrentImage() {
@@ -1271,80 +1333,94 @@
 
         async function loadHistory() {
             try {
-                const response = await fetch('/api/history');
-                const history = await response.json();
+                const res = await fetch('/api/history');
+                const history = await res.json();
                 const container = document.getElementById('history-container');
                 
                 if (history.length === 0) {
-                    container.innerHTML = '<div class="empty-history">⚙ No forged images yet</div>';
+                    container.innerHTML = '<div class="empty-history">⚙ No images yet</div>';
                     return;
                 }
                 
                 container.innerHTML = '<div class="history-grid">' + 
                     history.map(item => `
-                        <div class="history-item" onclick="showHistoryModal('${item.id}', ${JSON.stringify(item.params).replace(/"/g, '&quot;')})">
-                            <img src="/api/history/${item.id}" alt="Generated image">
+                        <div class="history-item" onclick="showHistoryModal('${item.id}')">
+                            <img src="/api/history/${item.id}" alt="Generated" loading="lazy">
                             <div class="history-info">
                                 <div class="history-time">⏰ ${new Date(item.timestamp).toLocaleString()}</div>
                                 <div class="history-params">${item.params.positive_prompt.substring(0, 50)}...</div>
                             </div>
                         </div>
-                    `).join('') + 
-                '</div>';
+                    `).join('') + '</div>';
             } catch (e) {
                 console.error('Failed to load history:', e);
             }
         }
 
-        function showHistoryModal(id, params) {
+        async function showHistoryModal(id) {
             currentHistoryId = id;
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modal-image');
-            const modalParams = document.getElementById('modal-params');
-            
-            modalImage.src = `/api/history/${id}`;
-            modalParams.innerHTML = `
-                <strong>✒ Positive:</strong> ${params.positive_prompt}<br>
-                <strong>✖ Negative:</strong> ${params.negative_prompt}<br>
-                <strong>⚗ Model:</strong> ${params.model}<br>
-                <strong>🌱 Seed:</strong> ${params.seed}<br>
-                <strong>👣 Steps:</strong> ${params.steps}<br>
-                <strong>⚖ CFG:</strong> ${params.cfg}<br>
-                <strong>📐 Size:</strong> ${params.width}x${params.height}<br>
-                <strong>📦 Batch:</strong> ${params.batch_size}<br>
-                <strong>🔧 Sampler:</strong> ${params.sampler || 'euler_ancestral'}<br>
-                <strong>⏱ Scheduler:</strong> ${params.scheduler || 'normal'}
-            `;
-            
-            modal.classList.add('active');
-        }
-
-        function downloadHistoryImage() {
-            if (currentHistoryId) {
-                window.open(`/api/history/${currentHistoryId}/download`, '_blank');
+            try {
+                const res = await fetch(`/api/history/${id}/params`);
+                const p = await res.json();
+                
+                document.getElementById('modal-image').src = `/api/history/${id}`;
+                document.getElementById('modal-params').innerHTML = `
+                    <strong>✒ Positive:</strong> ${p.positive_prompt}<br>
+                    <strong>✖ Negative:</strong> ${p.negative_prompt}<br>
+                    <strong>⚗ Model:</strong> ${p.model}<br>
+                    <strong>🌱 Seed:</strong> ${p.seed}<br>
+                    <strong>👣 Steps:</strong> ${p.steps}<br>
+                    <strong>⚖ CFG:</strong> ${p.cfg}<br>
+                    <strong>📐 Size:</strong> ${p.width}x${p.height}<br>
+                    <strong>📦 Batch:</strong> ${p.batch_size}<br>
+                    <strong>🔧 Sampler:</strong> ${p.sampler || 'euler_ancestral'}<br>
+                    <strong>⏱ Scheduler:</strong> ${p.scheduler || 'normal'}
+                `;
+                document.getElementById('modal').classList.add('active');
+            } catch (e) {
+                console.error('Failed to load params:', e);
             }
         }
 
-        function sendToGenerate() {
-            const modalParams = document.getElementById('modal-params').textContent;
-            const paramsMatch = modalParams.match(/Positive: (.+?)Negative: (.+?)Model: (.+?)Seed: (\d+)Steps: (\d+)CFG: ([\d.]+)Size: (\d+)x(\d+)Batch: (\d+)Sampler: (.+?)Scheduler: (.+?)$/s);
-            
-            if (paramsMatch) {
-                document.getElementById('positive').value = paramsMatch[1].trim();
-                document.getElementById('negative').value = paramsMatch[2].trim();
-                document.getElementById('model').value = paramsMatch[3].trim();
-                document.getElementById('seed').value = paramsMatch[4];
-                document.getElementById('steps').value = paramsMatch[5];
-                document.getElementById('cfg').value = paramsMatch[6];
-                document.getElementById('width').value = paramsMatch[7];
-                document.getElementById('height').value = paramsMatch[8];
-                document.getElementById('batch').value = paramsMatch[9];
-                document.getElementById('sampler').value = paramsMatch[10].trim();
-                document.getElementById('scheduler').value = paramsMatch[11].trim();
+        function downloadHistoryImage() {
+            if (currentHistoryId) window.open(`/api/history/${currentHistoryId}/download`, '_blank');
+        }
+
+        async function sendToGenerate() {
+            if (!currentHistoryId) return;
+            try {
+                const res = await fetch(`/api/history/${currentHistoryId}/params`);
+                const p = await res.json();
+                
+                document.getElementById('positive').value = p.positive_prompt || '';
+                document.getElementById('negative').value = p.negative_prompt || '';
+                document.getElementById('model').value = p.model || '';
+                document.getElementById('seed').value = p.seed || -1;
+                document.getElementById('steps').value = p.steps || 20;
+                document.getElementById('cfg').value = p.cfg || 8;
+                document.getElementById('width').value = p.width || 1024;
+                document.getElementById('height').value = p.height || 1024;
+                document.getElementById('batch').value = p.batch_size || 1;
+                document.getElementById('sampler').value = p.sampler || 'euler_ancestral';
+                document.getElementById('scheduler').value = p.scheduler || 'normal';
+                
+                if (p.lora_1_name) {
+                    document.getElementById('lora1').value = p.lora_1_name;
+                    document.getElementById('lora1_weight').value = p.lora_1_weight || 1;
+                }
+                if (p.lora_2_name) {
+                    document.getElementById('lora2').value = p.lora_2_name;
+                    document.getElementById('lora2_weight').value = p.lora_2_weight || 1;
+                }
+                if (p.lora_3_name) {
+                    document.getElementById('lora3').value = p.lora_3_name;
+                    document.getElementById('lora3_weight').value = p.lora_3_weight || 1;
+                }
                 
                 closeModal();
-                switchTab('generate');
                 document.querySelector('.tab').click();
+            } catch (e) {
+                alert('Failed to load parameters');
             }
         }
 
@@ -1354,37 +1430,29 @@
             }
         }
 
-        // Templates
         function loadTemplates() {
             const container = document.getElementById('templates-container');
-            
             if (templates.length === 0) {
-                container.innerHTML = '<div class="empty-history">⚙ No templates saved</div>';
+                container.innerHTML = '<div class="empty-history">⚙ No templates</div>';
                 return;
             }
-            
-            container.innerHTML = templates.map((template, index) => `
-                <div class="template-item" onclick="loadTemplate(${index})">
-                    <div class="template-name">📋 ${template.name}</div>
-                    <div class="template-preview">${template.positive.substring(0, 80)}...</div>
-                    <button onclick="event.stopPropagation(); deleteTemplate(${index})" style="margin-top: 10px; background: linear-gradient(135deg, #8b0000 0%, #b22222 100%);">
-                        <span class="button-icon">🗑</span>Delete
+            container.innerHTML = templates.map((t, i) => `
+                <div class="template-item" onclick="loadTemplate(${i})">
+                    <div class="template-name">📋 ${t.name}</div>
+                    <div class="template-preview">${t.positive.substring(0, 80)}...</div>
+                    <button onclick="event.stopPropagation(); deleteTemplate(${i})" 
+                            style="margin-top:10px; background:linear-gradient(135deg,#8b0000 0%,#b22222 100%);">
+                        🗑 Delete
                     </button>
                 </div>
             `).join('');
         }
 
         function saveTemplate() {
-            const positive = document.getElementById('positive').value;
-            const negative = document.getElementById('negative').value;
-            
-            if (!positive) {
-                alert('Please enter a positive prompt first');
-                return;
-            }
-            
-            document.getElementById('template-positive').value = positive;
-            document.getElementById('template-negative').value = negative;
+            const pos = document.getElementById('positive').value;
+            if (!pos) return alert('Enter a prompt first');
+            document.getElementById('template-positive').value = pos;
+            document.getElementById('template-negative').value = document.getElementById('negative').value;
             document.getElementById('template-modal').classList.add('active');
         }
 
@@ -1397,32 +1465,25 @@
 
         function confirmSaveTemplate() {
             const name = document.getElementById('template-name').value;
-            const positive = document.getElementById('template-positive').value;
-            const negative = document.getElementById('template-negative').value;
-            
-            if (!name || !positive) {
-                alert('Please enter a name and positive prompt');
-                return;
-            }
-            
-            templates.push({ name, positive, negative });
+            const pos = document.getElementById('template-positive').value;
+            const neg = document.getElementById('template-negative').value;
+            if (!name || !pos) return alert('Enter name and prompt');
+            templates.push({ name, positive: pos, negative: neg });
             localStorage.setItem('brasswick_templates', JSON.stringify(templates));
-            
             closeTemplateModal();
             loadTemplates();
         }
 
-        function loadTemplate(index) {
-            const template = templates[index];
-            document.getElementById('positive').value = template.positive;
-            document.getElementById('negative').value = template.negative;
-            switchTab('generate');
+        function loadTemplate(i) {
+            const t = templates[i];
+            document.getElementById('positive').value = t.positive;
+            document.getElementById('negative').value = t.negative;
             document.querySelector('.tab').click();
         }
 
-        function deleteTemplate(index) {
+        function deleteTemplate(i) {
             if (confirm('Delete this template?')) {
-                templates.splice(index, 1);
+                templates.splice(i, 1);
                 localStorage.setItem('brasswick_templates', JSON.stringify(templates));
                 loadTemplates();
             }
@@ -1434,107 +1495,126 @@
             }
         }
 
-        // Settings
         async function loadSettings() {
             try {
-                const response = await fetch('/api/config');
-                const config = await response.json();
-                
-                document.getElementById('config-server').value = config.comfy_server;
-                document.getElementById('config-path').value = config.comfy_path;
-                document.getElementById('config-port').value = config.port;
-                document.getElementById('config-history').value = config.max_history;
-                document.getElementById('config-multiuser').checked = config.multi_user;
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                document.getElementById('config-server').value = cfg.comfy_server;
+                document.getElementById('config-path').value = cfg.comfy_path;
+                document.getElementById('config-venv').value = cfg.comfy_venv || '';
+                document.getElementById('config-port').value = cfg.port;
+                document.getElementById('config-history').value = cfg.max_history;
+                document.getElementById('config-multiuser').checked = cfg.multi_user;
             } catch (e) {
                 console.error('Failed to load config:', e);
             }
         }
 
         async function saveConfig() {
-            const config = {
+            const cfg = {
                 comfy_server: document.getElementById('config-server').value,
                 comfy_path: document.getElementById('config-path').value,
+                comfy_venv: document.getElementById('config-venv').value,
                 port: parseInt(document.getElementById('config-port').value),
                 max_history: parseInt(document.getElementById('config-history').value),
                 multi_user: document.getElementById('config-multiuser').checked
             };
-            
             try {
                 await fetch('/api/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(config)
+                    body: JSON.stringify(cfg)
                 });
-                alert('⚙ Configuration saved! Restart Brasswick for changes to take effect.');
+                alert('⚙ Configuration saved! Restart Brasswick.');
             } catch (e) {
-                alert('❌ Failed to save configuration');
+                alert('❌ Failed to save');
             }
         }
 
         async function startServer() {
             try {
-                const response = await fetch('/api/server/start', { method: 'POST' });
-                const result = await response.json();
-                alert(result.success ? '▶ Server started' : '❌ Failed to start server');
+                const res = await fetch('/api/server/start', { method: 'POST' });
+                const result = await res.json();
+                alert(result.success ? '▶ Started' : '❌ Failed');
             } catch (e) {
-                alert('❌ Error starting server');
+                alert('❌ Error');
             }
         }
 
         async function stopServer() {
             try {
-                const response = await fetch('/api/server/stop', { method: 'POST' });
-                const result = await response.json();
-                alert(result.success ? '⏹ Server stopped' : '❌ Failed to stop server');
+                const res = await fetch('/api/server/stop', { method: 'POST' });
+                const result = await res.json();
+                alert(result.success ? '⏹ Stopped' : '❌ Failed');
             } catch (e) {
-                alert('❌ Error stopping server');
+                alert('❌ Error');
             }
         }
 
         async function restartServer() {
             try {
-                const response = await fetch('/api/server/restart', { method: 'POST' });
-                const result = await response.json();
-                alert(result.success ? '⟳ Server restarted' : '❌ Failed to restart server');
+                const res = await fetch('/api/server/restart', { method: 'POST' });
+                const result = await res.json();
+                alert(result.success ? '⟳ Restarted' : '❌ Failed');
             } catch (e) {
-                alert('❌ Error restarting server');
+                alert('❌ Error');
             }
         }
 
-        // Save user preferences
         function saveUserSettings() {
             userSettings = {
-                lastModel: document.getElementById('model').value,
+                model: document.getElementById('model').value,
+                positive_prompt: document.getElementById('positive').value,
+                negative_prompt: document.getElementById('negative').value,
                 sampler: document.getElementById('sampler').value,
                 scheduler: document.getElementById('scheduler').value,
                 cfg: document.getElementById('cfg').value,
+                seed: document.getElementById('seed').value,
+                seed_control: document.getElementById('seed-control').value,
                 steps: document.getElementById('steps').value,
                 width: document.getElementById('width').value,
-                height: document.getElementById('height').value
+                height: document.getElementById('height').value,
+                batch_size: document.getElementById('batch').value,
+                size_preset: document.getElementById('size-preset').value,
+                lora_1_name: document.getElementById('lora1').value,
+                lora_1_weight: document.getElementById('lora1_weight').value,
+                lora_2_name: document.getElementById('lora2').value,
+                lora_2_weight: document.getElementById('lora2_weight').value,
+                lora_3_name: document.getElementById('lora3').value,
+                lora_3_weight: document.getElementById('lora3_weight').value
             };
             localStorage.setItem('brasswick_settings', JSON.stringify(userSettings));
         }
 
         function loadUserSettings() {
+            if (userSettings.positive_prompt) document.getElementById('positive').value = userSettings.positive_prompt;
+            if (userSettings.negative_prompt) document.getElementById('negative').value = userSettings.negative_prompt;
             if (userSettings.cfg) document.getElementById('cfg').value = userSettings.cfg;
+            if (userSettings.seed !== undefined) document.getElementById('seed').value = userSettings.seed;
+            if (userSettings.seed_control) document.getElementById('seed-control').value = userSettings.seed_control;
             if (userSettings.steps) document.getElementById('steps').value = userSettings.steps;
+            if (userSettings.batch_size) document.getElementById('batch').value = userSettings.batch_size;
+            if (userSettings.lora_1_weight) document.getElementById('lora1_weight').value = userSettings.lora_1_weight;
+            if (userSettings.lora_2_weight) document.getElementById('lora2_weight').value = userSettings.lora_2_weight;
+            if (userSettings.lora_3_weight) document.getElementById('lora3_weight').value = userSettings.lora_3_weight;
+            
+            // Load size preset and dimensions
+            if (userSettings.size_preset) {
+                document.getElementById('size-preset').value = userSettings.size_preset;
+                loadAspectRatios();
+            }
             if (userSettings.width) document.getElementById('width').value = userSettings.width;
             if (userSettings.height) document.getElementById('height').value = userSettings.height;
         }
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
                 document.getElementById('generation-form').dispatchEvent(new Event('submit'));
             } else if (e.key === 'Escape') {
-                if (document.getElementById('modal').classList.contains('active')) {
-                    closeModal();
-                } else if (document.getElementById('template-modal').classList.contains('active')) {
-                    closeTemplateModal();
-                } else {
-                    cancelGeneration();
-                }
+                if (document.getElementById('modal').classList.contains('active')) closeModal();
+                else if (document.getElementById('template-modal').classList.contains('active')) closeTemplateModal();
+                else cancelGeneration();
             } else if (e.ctrlKey && e.key === 'r') {
                 e.preventDefault();
                 randomSeed();
@@ -1545,6 +1625,13 @@
                 e.preventDefault();
                 saveTemplate();
             }
+        });
+
+        document.getElementById('size-preset').addEventListener('change', () => {
+            loadAspectRatios();
+            const size = document.getElementById('size-preset').value;
+            setAspectRatio(size, '1:1');
+            saveUserSettings();
         });
 
         document.getElementById('generation-form').addEventListener('submit', async (e) => {
@@ -1571,33 +1658,34 @@
             };
 
             try {
-                const response = await fetch('/api/generate', {
+                const res = await fetch('/api/generate', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(params)
                 });
                 
-                const result = await response.json();
+                const result = await res.json();
                 currentSeed = result.seed;
                 document.getElementById('seed').value = currentSeed;
-                
                 saveUserSettings();
                 
-                if (!statusCheckInterval) {
-                    statusCheckInterval = setInterval(checkStatus, 500);
-                }
+                if (!statusCheckInterval) statusCheckInterval = setInterval(checkStatus, 500);
             } catch (e) {
-                alert('❌ Failed to start generation: ' + e.message);
+                alert('❌ Failed: ' + e.message);
             }
         });
 
-        // Initialize
-        loadModels();
-        loadLoras();
-        loadSamplers();
-        loadSchedulers();
-        loadSizePresets();
-        loadUserSettings();
+        loadTheme();
+        
+        // Load everything in sequence to ensure settings are applied
+        (async () => {
+            await loadModels();
+            await loadLoras();
+            await loadSamplers();
+            await loadSchedulers();
+            loadAspectRatios();
+            loadUserSettings();
+        })();
         
         statusCheckInterval = setInterval(checkStatus, 500);
     </script>
