@@ -34,6 +34,7 @@ Think: a lightweight frontend for ComfyUI with a queue, quick presets, LoRA stac
   * Seed, CFG, steps, sampler, scheduler, model, LoRAs (up to 3)
   * ETA & progress updates
   * Generation history (since startup)
+  * Image tagger (via WD14)
   * Start/stop/restart ComfyUI support on Linux
   * Basic multi-user support (WIP)
 
@@ -45,6 +46,8 @@ Think: a lightweight frontend for ComfyUI with a queue, quick presets, LoRA stac
 * `pip`
 * Git
 * ComfyUI running locally or reachable over network (HTTP + WebSocket)
+* ComfyUI Custom Nodes:
+  * `comfyui-wd14-tagger` (Search for "WD14 Tagger" in ComfyUI Manager or install [pythongosssss/ComfyUI-WD14-Tagger](https://github.com/pythongosssss/ComfyUI-WD14-Tagger))
 * On your machine:
 
   * `Flask` and other Python packages listed in `requirements.txt`
@@ -205,11 +208,16 @@ Open your browser to: `http://localhost:5000/`
 * Open `http://<host>:<port>/` in your browser.
 * UI features:
 
+* Generate Tab:
   * Fill positive and negative prompts.
   * Choose model, sampler, scheduler, steps, CFG, seed (or set `-1` for random), width / height, batch size.
   * Up to 3 LoRAs with weights.
   * Queue/pause/cancel generation.
   * Download generated image or access history items.
+* Tagger Tab:
+  * Upload any image to analyze it.
+  * Select a WD14 model (e.g., `wd-eva02-large-tagger-v3`) and threshold.
+  * Extract tags and copy them directly to your positive prompt or clipboard.
 
 ## Managing ComfyUI from Brasswick (Linux caveat)
 
@@ -283,7 +291,7 @@ Brasswick can optionally start/stop/restart ComfyUI using `ComfyUI Installation 
 * Docker image / easier installs
 * Per-user quotas & limits
 * API/CLI improvements
-* Tagging and similarity search
+* Similarity search (Tagging added)
 * GGUF / new model formats support
 
 **Notes for contributors**

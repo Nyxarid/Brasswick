@@ -813,6 +813,7 @@
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('generate')">⚒ Generate</button>
+            <button class="tab" onclick="switchTab('tagger')">🏷 Tagger</button>
             <button class="tab" onclick="switchTab('history')">📜 History</button>
             <button class="tab" onclick="switchTab('templates')">📋 Templates</button>
             <button class="tab" onclick="switchTab('settings')">⚙ Settings</button>
@@ -979,6 +980,52 @@
                         <div id="eta-info" class="eta-info"></div>
                     </div>
                     <img id="preview" alt="Generated image">
+                </div>
+            </div>
+        </div>
+
+        <div id="tagger-tab" class="tab-content">
+            <div class="main-content">
+                <div class="panel">
+                    <div class="section-header">Image Interrogator</div>
+                    
+                    <div class="form-group">
+                        <label>Upload Image</label>
+                        <input type="file" id="tagger-input" accept="image/*" style="padding: 10px;">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label>Threshold</label>
+                            <input type="number" id="tagger-threshold" value="0.35" min="0.1" max="1.0" step="0.05">
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <select id="tagger-model">
+                                <option value="wd-eva02-large-tagger-v3">EVA02 Large V3</option>
+                                <option value="wd-v1-4-moat-tagger-v2">Moat V2</option>
+                                <option value="wd-v1-4-swinv2-tagger-v2">SwinV2</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="interrogateImage()" id="tagger-btn">🔍 Interrogate</button>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Detected Tags</label>
+                        <textarea id="tagger-result" readonly style="height: 150px; font-family: monospace;"></textarea>
+                        <div class="button-group">
+                            <button class="button-secondary" onclick="copyTags('positive')">Copy to Positive</button>
+                            <button class="button-secondary" onclick="copyTags('clipboard')">Copy to Clipboard</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="preview-container">
+                    <img id="tagger-preview" style="max-width: 100%; max-height: 500px; display: none; border: 2px solid var(--dark-brass);">
+                    <div id="tagger-placeholder" class="placeholder">
+                        <p>Upload an image to see it here</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1688,6 +1735,86 @@
         })();
         
         statusCheckInterval = setInterval(checkStatus, 500);
+
+        // --- WD14 Tagger Support ---
+        
+        // Preview image on selection (check if element exists first to avoid errors)
+        const taggerInput = document.getElementById('tagger-input');
+        if (taggerInput) {
+            taggerInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('tagger-preview').src = e.target.result;
+                        document.getElementById('tagger-preview').style.display = 'block';
+                        document.getElementById('tagger-placeholder').style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        async function interrogateImage() {
+            const fileInput = document.getElementById('tagger-input');
+            const btn = document.getElementById('tagger-btn');
+            const resultArea = document.getElementById('tagger-result');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select an image first.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Interrogating...';
+            resultArea.value = 'Processing...';
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('threshold', document.getElementById('tagger-threshold').value);
+            formData.append('model', document.getElementById('tagger-model').value);
+
+            try {
+                const response = await fetch('/api/tag', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+                
+                resultArea.value = data.tags;
+            } catch (e) {
+                alert('Error: ' + e.message);
+                resultArea.value = 'Error occurred during tagging.';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Interrogate';
+            }
+        }
+
+        function copyTags(destination) {
+            const tags = document.getElementById('tagger-result').value;
+            if (!tags) return;
+
+            if (destination === 'positive') {
+                const current = document.getElementById('positive').value;
+                document.getElementById('positive').value = current ? current + ', ' + tags : tags;
+                switchTab('generate');
+                
+                // Visual feedback
+                const posInput = document.getElementById('positive');
+                const originalBorder = posInput.style.borderColor;
+                posInput.style.borderColor = 'var(--brass)';
+                setTimeout(() => posInput.style.borderColor = originalBorder, 300);
+            } else if (destination === 'clipboard') {
+                navigator.clipboard.writeText(tags);
+                alert('Tags copied to clipboard!');
+            }
+        }
+
+        // --- End Tagger Support ---
     </script>
 </body>
 </html>

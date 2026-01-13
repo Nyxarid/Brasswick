@@ -14,6 +14,7 @@ import signal
 from datetime import datetime
 from collections import deque
 from pathlib import Path
+import mimetypes
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -444,6 +445,35 @@ def restart_comfy_server():
     time.sleep(2)
     return start_comfy_server()
 
+def upload_image_to_comfy(file_storage):
+    """Uploads a Flask FileStorage object to ComfyUI"""
+    filename = file_storage.filename
+    content_type = file_storage.content_type
+    file_bytes = file_storage.read()
+    
+    # Simple multipart/form-data construction
+    boundary = '----WebKitFormBoundary' + uuid.uuid4().hex
+    body = []
+    
+    body.append(f'--{boundary}'.encode())
+    body.append(f'Content-Disposition: form-data; name="image"; filename="{filename}"'.encode())
+    body.append(f'Content-Type: {content_type}'.encode())
+    body.append(b'')
+    body.append(file_bytes)
+    body.append(f'--{boundary}--'.encode())
+    body.append(b'')
+    
+    data = b'\r\n'.join(body)
+    
+    req = urllib.request.Request(
+        f"http://{COMFY_SERVER}/upload/image",
+        data=data
+    )
+    req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
+    
+    with urllib.request.urlopen(req) as response:
+        return json.loads(response.read())
+
 # Routes
 @app.route('/')
 def index():
@@ -617,6 +647,69 @@ def api_config():
         return jsonify({'success': True})
     
     return jsonify(config)
+
+@app.route('/api/tag', methods=['POST'])
+def api_tag_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+        
+    f = request.files['image']
+    threshold = float(request.form.get('threshold', 0.35))
+    model = request.form.get('model', 'wd-eva02-large-tagger-v3')
+    
+    try:
+        # 1. Upload to ComfyUI
+        upload_resp = upload_image_to_comfy(f)
+        comfy_filename = upload_resp.get('name', f.filename)
+        
+        # 2. Build Tagger Workflow
+        workflow = {
+            "1": {
+                "inputs": {
+                    "image": comfy_filename,
+                    "upload": "image"
+                },
+                "class_type": "LoadImage",
+                "_meta": {"title": "Load Image"}
+            },
+            "2": {
+                "inputs": {
+                    "model": model,
+                    "threshold": threshold,
+                    "character_threshold": 0.85,
+                    "replace_underscore": False,
+                    "trailing_comma": False,
+                    "exclude_tags": "",
+                    "image": ["1", 0]
+                },
+                "class_type": "WD14Tagger|pysssss",
+                "_meta": {"title": "WD14 Tagger 🐍"}
+            }
+        }
+        
+        # 3. Queue and wait for result
+        # We need the prompt_id to fetch history
+        prompt_resp = json.loads(queue_prompt(workflow, str(uuid.uuid4())))
+        prompt_id = prompt_resp['prompt_id']
+        
+        # Poll for completion (simple loop with timeout)
+        for _ in range(30): # 30 seconds timeout
+            time.sleep(1)
+            history = get_history_data(prompt_id)
+            if history and prompt_id in history:
+                # Extract tags from node 2 output
+                outputs = history[prompt_id]['outputs']
+                if '2' in outputs:
+                    # The node returns [string_of_tags, dictionary_of_tags] usually
+                    # We just want the string
+                    tags = outputs['2']['tags'][0] # Adjust key 'tags' if output format differs
+                    return jsonify({'tags': tags})
+                    
+        return jsonify({'error': 'Timeout waiting for tagger'}), 504
+        
+    except Exception as e:
+        print(f"Tagging error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     os.makedirs('templates', exist_ok=True)
