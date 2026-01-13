@@ -406,8 +406,8 @@ def start_comfy_server():
                 [python_exec, 'main.py'],
                 cwd=comfy_path,
                 # Send output to the void
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
             )
             return True
         except Exception as e:
