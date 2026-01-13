@@ -405,8 +405,9 @@ def start_comfy_server():
             comfy_process = subprocess.Popen(
                 [python_exec, 'main.py'],
                 cwd=comfy_path,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                # Send output to the void
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             return True
         except Exception as e:
