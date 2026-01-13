@@ -47,6 +47,7 @@ Think: a lightweight frontend for ComfyUI with a queue, quick presets, LoRA stac
 * Git
 * ComfyUI running locally or reachable over network (HTTP + WebSocket)
 * ComfyUI Custom Nodes:
+  * `Comfyroll Studio` (Search for "Comfyroll Studio" in ComfyUI Manager or install [Suzie1/ComfyUI_Comfyroll_CustomNodes](https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes))
   * `comfyui-wd14-tagger` (Search for "WD14 Tagger" in ComfyUI Manager or install [pythongosssss/ComfyUI-WD14-Tagger](https://github.com/pythongosssss/ComfyUI-WD14-Tagger))
 * On your machine:
 
