@@ -93,24 +93,28 @@ def queue_prompt(prompt, prompt_id):
     p = {"prompt": prompt, "client_id": get_client_id(), "prompt_id": prompt_id}
     data = json.dumps(p).encode('utf-8')
     req = urllib.request.Request(f"http://{COMFY_SERVER}/prompt", data=data)
-    return urllib.request.urlopen(req).read()
+    # Added timeout=5
+    return urllib.request.urlopen(req, timeout=5).read()
 
 def get_image(filename, subfolder, folder_type):
     """Retrieve generated image from ComfyUI"""
     data = {"filename": filename, "subfolder": subfolder, "type": folder_type}
     url_values = urllib.parse.urlencode(data)
-    with urllib.request.urlopen(f"http://{COMFY_SERVER}/view?{url_values}") as response:
+    # Added timeout=10 (images can be large, give it slightly more time)
+    with urllib.request.urlopen(f"http://{COMFY_SERVER}/view?{url_values}", timeout=10) as response:
         return response.read()
 
 def get_history_data(prompt_id):
     """Get generation history"""
-    with urllib.request.urlopen(f"http://{COMFY_SERVER}/history/{prompt_id}") as response:
+    # Added timeout=5
+    with urllib.request.urlopen(f"http://{COMFY_SERVER}/history/{prompt_id}", timeout=5) as response:
         return json.loads(response.read())
 
 def get_queue_info():
     """Get current queue information from ComfyUI"""
     try:
-        with urllib.request.urlopen(f"http://{COMFY_SERVER}/queue") as response:
+        # Added timeout=2 to prevent UI freezing during polling
+        with urllib.request.urlopen(f"http://{COMFY_SERVER}/queue", timeout=2) as response:
             data = json.loads(response.read())
             return data
     except:
@@ -120,7 +124,8 @@ def interrupt_generation():
     """Interrupt current generation"""
     try:
         req = urllib.request.Request(f"http://{COMFY_SERVER}/interrupt", method='POST')
-        urllib.request.urlopen(req)
+        # Added timeout=2
+        urllib.request.urlopen(req, timeout=2)
         return True
     except:
         return False
@@ -128,7 +133,8 @@ def interrupt_generation():
 def get_models():
     """Fetch available models from ComfyUI"""
     try:
-        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/CheckpointLoaderSimple") as response:
+        # Added timeout=5
+        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/CheckpointLoaderSimple", timeout=5) as response:
             data = json.loads(response.read())
             return data['CheckpointLoaderSimple']['input']['required']['ckpt_name'][0]
     except Exception as e:
@@ -138,7 +144,8 @@ def get_models():
 def get_loras():
     """Fetch available LoRAs from ComfyUI"""
     try:
-        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info") as response:
+        # Added timeout=5
+        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info", timeout=5) as response:
             data = json.loads(response.read())
             
             if 'CR LoRA Stack' in data:
@@ -157,7 +164,8 @@ def get_loras():
 def get_samplers():
     """Fetch available samplers from ComfyUI"""
     try:
-        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/KSampler") as response:
+        # Added timeout=5
+        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/KSampler", timeout=5) as response:
             data = json.loads(response.read())
             return data['KSampler']['input']['required']['sampler_name'][0]
     except:
@@ -168,7 +176,8 @@ def get_samplers():
 def get_schedulers():
     """Fetch available schedulers from ComfyUI"""
     try:
-        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/KSampler") as response:
+        # Added timeout=5
+        with urllib.request.urlopen(f"http://{COMFY_SERVER}/object_info/KSampler", timeout=5) as response:
             data = json.loads(response.read())
             return data['KSampler']['input']['required']['scheduler'][0]
     except:
@@ -402,12 +411,16 @@ def start_comfy_server():
             else:
                 python_exec = 'python'
             
+            # FIX: Open a log file instead of using PIPE
+            log_path = DATA_DIR / 'comfy_server.log'
+            log_file = open(log_path, 'w')
+            
             comfy_process = subprocess.Popen(
                 [python_exec, 'main.py'],
                 cwd=comfy_path,
-                # Send output to the void
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                # Redirect stdout to file, and merge stderr into stdout
+                stdout=log_file,
+                stderr=subprocess.STDOUT
             )
             return True
         except Exception as e:
